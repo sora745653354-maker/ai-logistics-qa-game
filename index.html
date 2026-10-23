@@ -8,11 +8,21 @@
   <title>AI 物流实验室 · 实战训练营</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='22' fill='%237356d8'/%3E%3Cpath d='M40 15l7 18 18 7-18 7-7 18-7-18-18-7 18-7z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
-  <script src="questions.js" defer></script>
-  <script src="core.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="auth.js" defer></script>
 </head>
 <body>
+  <main id="auth-screen" class="auth-screen" aria-live="polite">
+    <section class="auth-card">
+      <a class="brand auth-brand" href="#" aria-label="AI 物流实验室"><span class="brand-mark">✦</span><span>AI 物流实验室<small>LOGISTICS AI LAB</small></span></a>
+      <div class="auth-eyebrow">FEISHU SECURE SIGN IN</div>
+      <h1>扫码登录，开始挑战</h1>
+      <p class="auth-description">请使用飞书 App 扫描二维码并确认授权。登录后进入 AI 物流实验室。</p>
+      <div id="feishu-qr" class="feishu-qr" aria-label="飞书登录二维码"><span class="qr-placeholder">正在连接飞书登录…</span></div>
+      <p id="auth-status" class="auth-status" role="status">正在检查登录配置</p>
+      <button id="auth-retry" class="secondary-button auth-retry" type="button" hidden>刷新二维码</button>
+      <small class="auth-footnote">登录凭证由飞书验证；页面不会保存飞书密码。</small>
+    </section>
+  </main>
   <aside class="sidebar">
     <a class="brand" href="#home" aria-label="AI 物流实验室首页"><span class="brand-mark">✦</span><span>AI 物流实验室<small>LOGISTICS AI LAB</small></span></a>
     <div class="workspace-label">学习工作台 <span>PREVIEW</span></div>
@@ -28,7 +38,7 @@
     </div>
   </aside>
   <div class="app-shell">
-    <header class="topbar"><div class="breadcrumb">学习中心 <span>/</span> <strong id="breadcrumb-current">挑战大厅</strong></div><div class="header-actions"><button class="icon-button" id="rules-button" aria-label="游戏规则"><span data-icon="help"></span></button><span class="header-divider"></span><button class="profile-button" id="profile-button"><span class="avatar">学</span><span id="profile-name">体验学员</span><span data-icon="chevron"></span></button></div></header>
+    <header class="topbar"><div class="breadcrumb">学习中心 <span>/</span> <strong id="breadcrumb-current">挑战大厅</strong></div><div class="header-actions"><button class="icon-button" id="rules-button" aria-label="游戏规则"><span data-icon="help"></span></button><span class="header-divider"></span><button class="profile-button" id="profile-button"><span class="avatar">学</span><span id="profile-name">飞书用户</span><span data-icon="chevron"></span></button></div></header>
     <main id="main" tabindex="-1"></main>
     <footer><span>AI 物流实验室 <span class="footer-dot">·</span> 让好奇心，成为生产力</span><span>静态练习版 <span class="footer-dot">·</span> 成绩仅保存在当前浏览器</span></footer>
   </div>
