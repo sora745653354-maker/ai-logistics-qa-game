@@ -83,6 +83,7 @@
         return;
       }
       await startQr();
+      if (authError && retry.hidden) setStatus(authError === 'state' ? '登录请求已失效，请刷新二维码后重试。' : '飞书登录未完成，请重新扫码并确认授权。', true);
     } catch {
       screen.hidden = false;
       document.body.classList.remove('authenticated');
