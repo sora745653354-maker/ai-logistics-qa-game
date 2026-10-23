@@ -1,2 +1,50 @@
-# ai-logistics-qa-game
-Interactive Chinese AI and logistics quiz for beginner logistics colleagues.
+# AI 物流实验室
+
+面向零 AI 基础的物流同事的静态互动问答游戏。当前版本使用预设中文题库，不调用大模型，也不连接生产订单或业务系统。
+
+## 本地运行
+
+直接打开 `index.html`，或在项目目录启动本机静态服务器：
+
+```sh
+python3 -m http.server 4187 --bind 127.0.0.1
+```
+
+浏览器访问 `http://127.0.0.1:4187`。
+
+## 游戏内容
+
+- 54 道单选题：Easy、Normal、Hard 每档各 18 题，覆盖 AI 提示词、物流 To B、物流 To C。
+- 每局 6 题。综合练习每类各 2 题，专项练习抽取对应主题的 6 题。
+- 每题提供即时反馈、答案解释和知识总结，结束后可查看本局解析。
+- 基础分按 Easy / Normal / Hard 为 100 / 150 / 200 分。连对有奖励；答错重置连击，不扣已得分。
+- 错题会保存到本机错题本，可展开解析并重复练习。
+- 成绩榜按难度和方向分组，成绩和昵称仅储存在访问者的浏览器中。
+- 带有提示词小抄、响应式页面和键盘操作支持。
+
+## 重要边界
+
+当前排行榜只在同一浏览器和访问地址内有效，昵称不代表用户身份，浏览器本地分数可修改。飞书扫码登录和团队共享排名还未实现。本版不能用于身份认证或正式竞赛。
+
+题库中的物流流程、指标、时间点及示例数字均为教学约定。实际业务以公司已确认的流程和指标口径为准。使用真实客户或订单资料前，先确认授权并移除无关个人信息。
+
+## Cloudflare 部署
+
+本仓库可以作为 Cloudflare Pages 静态项目的 Git 来源；连接仓库后，将构建命令留空，输出目录设为仓库根目录 `/`。
+
+Cloudflare Pages 的 Git 自动部署会在推送提交后更新站点。首次将 `babycare2b.site` 绑定到此项目时，需先解除该域名在现有 Worker 上的“自定义域”绑定，再将根域添加到 Pages 的自定义域。域名级 Workers Routes 列表当前为空，因此请在 Workers & Pages 的 Worker 设置中查找自定义域；不要删除 Worker 服务本身。把根域切换到问答游戏会替换当前同域名提供的 B2B 运营控制塔页面。
+
+如果该域名已连接另一项服务，先确认将主站切换到本游戏是预期结果。保持 DNS 处于 Cloudflare 管理下，并让 Pages 负责域名校验与 DNS 记录。
+
+## 文件
+
+- `index.html`：页面结构。
+- `styles.css`：响应式样式。
+- `app.js`：答题流程、积分、排行榜及浏览器本地存储。
+- `core.js`：抽题、积分、排行榜计算。
+- `questions.js`：练习题库。
+
+## 外部参考
+
+- [IBM：提示词设计技巧](https://www.ibm.com/think/topics/prompt-engineering-techniques)
+- [GS1：EPCIS 供应链事件标准](https://www.gs1.org/standards/epcis)
