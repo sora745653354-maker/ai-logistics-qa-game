@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#7656d8">
+  <meta name="description" content="面向物流同事的 AI 实战训练营。从提示词入门到 To B / To C 物流场景，在答题中学习。">
+  <title>AI 物流实验室 · 实战训练营</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='22' fill='%237356d8'/%3E%3Cpath d='M40 15l7 18 18 7-18 7-7 18-7-18-18-7 18-7z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="questions.js" defer></script>
+  <script src="core.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#home" aria-label="AI 物流实验室首页"><span class="brand-mark">✦</span><span>AI 物流实验室<small>LOGISTICS AI LAB</small></span></a>
+    <div class="workspace-label">学习工作台 <span>PREVIEW</span></div>
+    <nav aria-label="主导航">
+      <a href="#home" data-page="home" class="nav-item active"><span data-icon="grid"></span>挑战大厅<span class="nav-dot"></span></a>
+      <a href="#leaderboard" data-page="leaderboard" class="nav-item"><span data-icon="trophy"></span>排行榜</a>
+      <a href="#knowledge" data-page="knowledge" class="nav-item"><span data-icon="book"></span>知识补给站</a>
+      <a href="#mistakes" data-page="mistakes" class="nav-item"><span data-icon="bookmark"></span>我的错题本<span id="mistake-badge" class="nav-badge">0</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="side-tip"><div class="tip-star">✧</div><strong>每一次提问，<br>都可以更进一步。</strong><p>不需要懂代码，<br>从一次小小的挑战开始。</p><button class="text-button" id="sidebar-rules">了解游戏规则 <span>↗</span></button></div>
+      <div class="local-status"><span></span>本地体验版 <span class="version">v0.1</span></div>
+    </div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div class="breadcrumb">学习中心 <span>/</span> <strong id="breadcrumb-current">挑战大厅</strong></div><div class="header-actions"><button class="icon-button" id="rules-button" aria-label="游戏规则"><span data-icon="help"></span></button><span class="header-divider"></span><button class="profile-button" id="profile-button"><span class="avatar">学</span><span id="profile-name">体验学员</span><span data-icon="chevron"></span></button></div></header>
+    <main id="main" tabindex="-1"></main>
+    <footer><span>AI 物流实验室 <span class="footer-dot">·</span> 让好奇心，成为生产力</span><span>静态练习版 <span class="footer-dot">·</span> 成绩仅保存在当前浏览器</span></footer>
+  </div>
+  <dialog id="modal"><div id="modal-content"></div></dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
