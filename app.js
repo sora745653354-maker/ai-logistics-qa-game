@@ -105,7 +105,7 @@
   }
   const boardStatus = (level, topic) => sharedBoardErrors.get(boardKey(level, topic)) || '正在读取全员共享榜单…';
   const state = { page: 'home', level: 'easy', topic: 'all', boardLevel: 'easy', boardTopic: 'all', quiz: null, result: null };
-  const names = { home: '挑战大厅', leaderboard: '排行榜', knowledge: '知识补给站', mistakes: '我的错题本', admin: '用户访问记录', challenge: '正在挑战', result: '挑战成绩' };
+  const names = { home: '挑战大厅', leaderboard: '排行榜', knowledge: '知识补给站', videos: '视频学习', mistakes: '我的错题本', admin: '用户访问记录', challenge: '正在挑战', result: '挑战成绩' };
   const avatarContents = user => {
     const url = /^https:\/\//i.test(user?.avatar_url || '') ? user.avatar_url : '';
     return url ? `<img src="${esc(url)}" alt="${esc(user.name || '飞书用户')}的飞书头像">` : esc((user?.name || '飞').slice(0, 1));
@@ -292,6 +292,15 @@
       catch { modal(`${modalHead('复制提示词模板')}<p>浏览器未允许自动复制。请选中下方文字后手动复制。</p><textarea class="text-input" id="manual-copy" rows="10" readonly>${esc(template)}</textarea><button class="primary-button full-width" data-close>完成</button>`); $('#manual-copy').select(); }
     };
   }
+  function videoLearning() {
+    const lessons = [
+      { file: '01_AI零基础_认识人工智能', title: '认识人工智能', level: '入门', duration: '约 1 分 48 秒', goal: '知道 AI 能做什么、容易在哪里答错，以及如何安全核对。', points: ['生成式 AI 擅长整理和起草，不是业务系统。', '材料没有提供的信息要标成“待核实”。', '输入前保护隐私，输出后复核事实与承诺。'] },
+      { file: '02_提示词入门_让AI听懂任务', title: '提示词入门', level: '基础', duration: '约 1 分 45 秒', goal: '用任务、背景、限制和输出格式四部分说明需求。', points: ['任务说清楚要完成的动作。', '背景只提供完成任务所需的事实。', '限制和格式帮助检查答案是否越界。'] },
+      { file: '03_ToB物流_异常整理与处理清单', title: 'To B 物流异常处理', level: '应用', duration: '约 1 分 46 秒', goal: '从企业物流记录整理事实、未知项和下一步核实清单。', points: ['分开记录已知事实与缺失信息。', 'AI 可以草拟待办，不能把建议写成已完成动作。', '客户承诺与责任判断由业务负责人确认。'] },
+      { file: '04_ToC物流_包裹查询与客服回复', title: 'To C 包裹查询与客服回复', level: '进阶', duration: '约 1 分 48 秒', goal: '根据追踪信息拟写友好、准确且不过度承诺的回复。', points: ['先说明已确认的物流进度。', '没有预计时间就不承诺送达日期。', '投诉和高风险情况按公司流程升级。'] },
+    ];
+    $('#main').innerHTML = `${heading('LEARN STEP BY STEP', '视频学习', '从认识 AI 开始，循序练习提示词，再把方法用在 To B 和 To C 物流场景。')}<div class="video-course-intro"><strong>建议按顺序学习</strong><span>4 节 · 约 7 分钟 · 简体中文字幕 · 配套 WPS / Word 手册</span><a class="secondary-button" href="learning-videos/AI物流视频学习手册.docx" download>下载学习手册 ${icon('arrow')}</a></div><div class="video-course-grid fade-in">${lessons.map((lesson, i) => `<article class="video-course-card"><div class="video-course-head"><span class="video-course-number">0${i + 1}</span><div><span class="video-course-level">${lesson.level} · ${lesson.duration}</span><h2>${lesson.title}</h2></div></div><video controls preload="metadata" playsinline aria-label="课程视频：${lesson.title}"><source src="learning-videos/${lesson.file}.mp4" type="video/mp4"><track kind="captions" src="learning-videos/${lesson.file}.vtt" srclang="zh-CN" label="简体中文字幕" default>当前浏览器无法播放此视频。</video><p class="video-course-goal">${lesson.goal}</p><ul>${lesson.points.map(point => `<li>${point}</li>`).join('')}</ul><div class="video-course-links"><a href="learning-videos/${lesson.file}.srt" download>下载字幕</a><a href="learning-videos/${lesson.file}.mp4" download>下载视频</a></div></article>`).join('')}</div><p class="video-course-note">案例中的客户、订单代号和状态均为教学虚构内容。视频以画面文字和中文字幕呈现；涉及真实工作时，请按已批准的业务规则处理。</p>`;
+  }
   function mistakes() {
     const list = [...data.mistakes].reverse().map(m => ({ ...m, q: bank.find(q => q.id === m.id) })).filter(m => m.q);
     $('#main').innerHTML = `${heading('EVERY MISTAKE IS A NEW START', '把没懂的，再学一遍', '错题不是扣分项，是留给下一次的进步空间。')}${warning()}${list.length ? `<div class="mistake-actions"><button class="primary-button" id="practice-mistakes">${icon('refresh')}练习全部错题</button><span class="counter">共 ${list.length} 道错题 · 练习不计排行榜</span></div><div class="mistake-list fade-in">${list.map(({ q, wrongAnswer }) => `<article class="review-item"><div class="section-head"><span class="topic-tag">${q.level} · ${TOPICS[q.topic]}</span></div><h3>${esc(q.title)}</h3><p>上次选择：${esc(wrongAnswer)}</p><div class="mistake-item-actions"><details><summary>展开答案与解析</summary><p><span class="answer-label">正确答案：${esc(q.options[q.answer])}</span><br>${esc(q.explanation)}<br>✧ ${esc(q.takeaway)}</p></details><button data-mastered="${q.id}" class="remove">已掌握，移出错题本 ✓</button></div></article>`).join('')}</div>` : `<section class="panel"><div class="empty-state"><div class="empty-symbol">${icon('bookmark')}</div><h2>这里暂时还是空白的</h2><p>答错的题目会自动收进来。完成一次挑战，看看自己已经掌握了多少。</p><button class="primary-button" id="mistake-start">去挑战 ${icon('arrow')}</button></div></section>`}`;
@@ -299,7 +308,7 @@
     if ($('#mistake-start')) $('#mistake-start').onclick = () => go('home');
     document.querySelectorAll('[data-mastered]').forEach(b => b.onclick = () => { data.mistakes = data.mistakes.filter(m => m.id !== b.dataset.mastered); persist(); syncChrome(); mistakes(); toast('已移出错题本，继续保持！'); });
   }
-  function render() { syncChrome(); ({ home, challenge: quiz, result, leaderboard, knowledge, mistakes, admin }[state.page] || home)(); }
+  function render() { syncChrome(); ({ home, challenge: quiz, result, leaderboard, knowledge, videos: videoLearning, mistakes, admin }[state.page] || home)(); }
   document.addEventListener('keydown', e => {
     if (state.page !== 'challenge' || !state.quiz || $('#modal').open || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     if (['1', '2', '3', '4'].includes(e.key) && !state.quiz.answered) { e.preventDefault(); choose(Number(e.key) - 1); }
