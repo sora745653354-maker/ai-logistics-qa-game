@@ -1,6 +1,6 @@
 import { cookie, json, verifySession } from '../../functions-shared/auth.js';
 
-const MODEL = '@cf/zai-org/glm-4.7-flash';
+const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const DAILY_LIMIT = 20;
 const MAX_MESSAGES = 10;
 const MAX_MESSAGE_CHARS = 1200;
@@ -72,9 +72,8 @@ export async function onRequestPost({ request, env }) {
   try {
     const result = await env.AI.run(MODEL, {
       messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...messages],
-      max_completion_tokens: 500,
+      max_tokens: 512,
       temperature: 0.6,
-      store: false,
     });
     const choice = result?.choices?.[0];
     const message = choice?.message;
