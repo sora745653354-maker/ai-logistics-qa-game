@@ -47,13 +47,13 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 登录后端使用 Cloudflare Pages Functions。通过 `python3 -m http.server` 打开静态文件时，Functions 不会运行，因此登录会停留在提示页；在 Cloudflare Pages 预览或生产环境中测试。
 
-1. 在飞书开放平台创建企业自建应用，启用网页能力，网页地址填 `https://babycare2b.site`，添加回调 URL `https://babycare2b.site/api/auth/callback`，并发布应用。使用其他域名时，两处 URL 都换成实际 HTTPS 域名。
-2. 在 Cloudflare Pages 项目的 Settings → Variables and Secrets 中设置：`FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_REDIRECT_URI`（完整回调 URL）和 `SESSION_SECRET`（至少 32 个字符的随机值）。其中 App Secret 和 Session Secret 必须设为 Secret，不能写入前端文件或 Git。
+1. 在飞书开放平台创建企业自建应用，启用网页能力，网页地址填 `https://ai-logistics-qa-game.pages.dev`，添加回调 URL `https://ai-logistics-qa-game.pages.dev/api/auth/callback`，并发布应用。使用其他域名时，两处 URL 都换成实际 HTTPS 域名。
+2. 在 Cloudflare Pages 项目的 Settings → Variables and Secrets 中设置：`FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_REDIRECT_URI`（完整回调 URL）和 `SESSION_SECRET`（至少 32 个字符的随机值）。其中 `FEISHU_APP_SECRET` 和 `SESSION_SECRET` 必须启用 Encrypt，不能写入前端文件或 Git。
 3. 确认 `functions/` 目录随项目根目录一起部署。提交后等待 Pages Functions 部署完成，再用飞书扫码授权验证登录和退出流程。
 
 `lark-cli auth login` 是 CLI 工具的 Device Flow 授权，授权的是命令行自身，不能代替网站访客的网页扫码登录；本项目使用飞书网页 QR SDK、OAuth 回调和服务端会话。登录只用于获取用户基本身份，不访问物流、通讯录等业务数据；如果飞书后台提示需要用户基本信息权限，请按最小权限配置。
 
-本次改造完成后，真实扫码仍需配置上述飞书应用和 Cloudflare Secret 才能联调。排行榜及分数仍保存在当前浏览器；如需跨设备团队排行榜，还需添加服务端数据库、服务端计分校验和排行榜 API。
+配置上述飞书应用凭证和 Cloudflare Secret 后，使用 `https://ai-logistics-qa-game.pages.dev/#home` 验证真实扫码登录。排行榜及分数仍保存在当前浏览器；如需跨设备团队排行榜，还需添加服务端数据库、服务端计分校验和排行榜 API。
 
 文件职责：`index.html` 页面外壳；`styles.css` 样式；`app.js` 交互与本地存储；`questions.js` 教学题库；`core.js` 抽题、积分和排序逻辑。
 
