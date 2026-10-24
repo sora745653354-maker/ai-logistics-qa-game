@@ -46,13 +46,20 @@
       qr.innerHTML = '';
       const qrLogin = window.QRLogin({ id: 'feishu-qr', goto: result.goto, width: '260', height: '260' });
       const onMessage = event => {
-        if (!qrLogin.matchOrigin(event.origin) || !qrLogin.matchData(event.data)) return;
-        const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
-        const tmpCode = event.data?.tmp_code || event.data?.tmpCode || payload.match(/tmp_code=([^&"\s]+)/)?.[1];
-        if (!tmpCode) return;
+        if (!qrLogin.matchOrigin(event.origin)) return;
+
+        // Feishu SDK 1.0.2 sends the temporary code as event.data directly.
+        // Some SDK responses wrap it in an object or query string, so accept those too.
+        const data = event.data;
+        let tmpCode = typeof data === 'string' ? data : data?.tmp_code || data?.tmpCode;
+        if (typeof tmpCode === 'string') {
+          tmpCode = tmpCode.match(/(?:^|[?&])tmp_code=([^&"\\s]+)/)?.[1] || tmpCode;
+        }
+        if (typeof tmpCode !== 'string' || !tmpCode.trim() || tmpCode.length > 4096) return;
+
         window.removeEventListener('message', onMessage);
         const redirect = new URL(result.goto);
-        redirect.searchParams.set('tmp_code', decodeURIComponent(tmpCode));
+        redirect.searchParams.set('tmp_code', tmpCode);
         setStatus('扫码成功，请在飞书中确认登录');
         window.location.assign(redirect.href);
       };
