@@ -12,8 +12,8 @@
     ],
     "practice": "请根据一条脱敏记录只整理已确认的信息；没有提供的时间和原因写待核实。",
     "exercise": "区分一条物流记录中的事实、未知项和推测。",
-    "duration_seconds": 144,
-    "duration_label": "约 2 分 24 秒",
+    "duration_seconds": 107,
+    "duration_label": "约 1 分 47 秒",
     "outline": [
       "从一个小问题开始",
       "AI 是什么",
@@ -36,8 +36,8 @@
     ],
     "practice": "请根据以下虚构物流记录找出缺失字段，不推测原因，并按事实、待核实、下一步输出。",
     "exercise": "把写一段客服回复扩写成四部分提示词。",
-    "duration_seconds": 144,
-    "duration_label": "约 2 分 24 秒",
+    "duration_seconds": 105,
+    "duration_label": "约 1 分 45 秒",
     "outline": [
       "为什么答案不一样",
       "四个组成部分",
@@ -60,8 +60,8 @@
     ],
     "practice": "根据虚构订单记录输出事实、待核实事项和建议动作。",
     "exercise": "生成一条内部待办并标出责任人待指派和完成后回填项。",
-    "duration_seconds": 144,
-    "duration_label": "约 2 分 24 秒",
+    "duration_seconds": 106,
+    "duration_label": "约 1 分 46 秒",
     "outline": [
       "To B 场景是什么",
       "虚构案例材料",
@@ -84,8 +84,8 @@
     ],
     "practice": "根据虚构轨迹写三句话回复，不承诺未提供的送达时间。",
     "exercise": "检查回复是否把事实、未知和下一步区分清楚。",
-    "duration_seconds": 144,
-    "duration_label": "约 2 分 24 秒",
+    "duration_seconds": 108,
+    "duration_label": "约 1 分 48 秒",
     "outline": [
       "To C 场景是什么",
       "使用虚构追踪记录",
