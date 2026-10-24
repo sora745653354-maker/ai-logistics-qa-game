@@ -2,7 +2,8 @@ import { cookie, json, verifySession } from '../../functions-shared/auth.js';
 
 const levels = { easy: 100, normal: 150, hard: 200 };
 const topics = new Set(['all', 'ai', 'b2b', 'b2c']);
-const maxScore = base => base * 6 + 120;
+const maxBonus = count => count < 2 ? 0 : count === 2 ? 10 : 30 + (count - 3) * 30;
+const maxScore = (base, count) => base * count + maxBonus(count);
 
 async function authenticatedUser(request, env) {
   const session = await verifySession(cookie(request, 'ai_lab_session'), env.SESSION_SECRET);
@@ -13,15 +14,16 @@ function database(env) {
   return env.LEADERBOARD_DB || null;
 }
 
-function validRun(record) {
+function validRun(record, migration = false) {
   const base = levels[record?.level];
+  const total = record?.total ?? (migration ? 6 : 20);
   return Boolean(
     base && topics.has(record.topic) &&
-    Number.isInteger(record.score) && record.score >= 0 && record.score <= maxScore(base) &&
+    (total === 20 || (migration && total === 6)) &&
+    Number.isInteger(record.score) && record.score >= 0 && record.score <= maxScore(base, total) &&
     Number.isInteger(record.duration) && record.duration >= 1 && record.duration <= 86400 &&
-    Number.isInteger(record.correct) && record.correct >= 0 && record.correct <= 6 &&
-    (record.correct === 0 ? record.score === 0 : record.score <= record.correct * base + 120) &&
-    (record.total === undefined || record.total === 6)
+    Number.isInteger(record.correct) && record.correct >= 0 && record.correct <= total &&
+    (record.correct === 0 ? record.score === 0 : record.score <= maxScore(base, record.correct))
   );
 }
 
@@ -32,14 +34,16 @@ function runDate(value, now, allowLegacyDate) {
 
 async function saveBest(db, user, record, allowLegacyDate = false) {
   const now = Date.now();
+  const total = record.total ?? (allowLegacyDate ? 6 : 20);
   return db.prepare(`
     INSERT INTO leaderboard (open_id, name, level, topic, score, duration, correct, total, achieved_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, 6, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT (open_id, level, topic) DO UPDATE SET
       name = excluded.name,
       score = excluded.score,
       duration = excluded.duration,
       correct = excluded.correct,
+      total = excluded.total,
       achieved_at = excluded.achieved_at
     WHERE excluded.score > leaderboard.score
       OR (excluded.score = leaderboard.score AND excluded.duration < leaderboard.duration)
@@ -52,6 +56,7 @@ async function saveBest(db, user, record, allowLegacyDate = false) {
     record.score,
     record.duration,
     record.correct,
+    total,
     runDate(record.date, now, allowLegacyDate),
   );
 }
@@ -93,7 +98,7 @@ export async function onRequestPost({ request, env }) {
 
   const migration = body?.migration === true;
   const records = Array.isArray(body?.records) ? body.records : [body?.record || body];
-  if (!records.length || records.length > 200 || records.some(record => !validRun(record))) {
+  if (!records.length || records.length > 200 || records.some(record => !validRun(record, migration))) {
     return json({ error: '成绩数据无效，请刷新页面后重试。' }, 400);
   }
 
