@@ -76,10 +76,17 @@ export async function onRequestPost({ request, env }) {
       temperature: 0.6,
       store: false,
     });
+    console.log('BabyCare AI response shape', JSON.stringify({
+      type: typeof result,
+      keys: result && typeof result === 'object' ? Object.keys(result) : [],
+      hasResponse: typeof result?.response === 'string',
+      hasChoices: Array.isArray(result?.choices),
+    }));
     const answer = result?.response || result?.choices?.[0]?.message?.content;
     if (typeof answer !== 'string' || !answer.trim()) throw new Error('empty model response');
     return json({ answer: answer.trim(), remaining: DAILY_LIMIT - usage.requests });
-  } catch {
+  } catch (error) {
+    console.error('BabyCare AI model call failed', error instanceof Error ? error.name : 'UnknownError', error instanceof Error ? error.message : String(error));
     return json({ error: '看板娘暂时没接上信号，请稍后重试。' }, 502);
   }
 }
