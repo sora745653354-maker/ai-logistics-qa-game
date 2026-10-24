@@ -28,6 +28,7 @@ python3 -m http.server 4187 --bind 127.0.0.1
 - 飞书扫码登录门禁：未登录只显示扫码页；飞书回调在 Pages Functions 服务端换取身份并签发 HttpOnly 会话 Cookie；游戏脚本在会话验证后才加载。
 - 登录后展示飞书头像并记录成功登录时间；“用户访问记录”仅管理员可见，服务端 API 会再次校验管理员飞书身份。
 - Pages Functions 使用飞书会话验证成绩读写；排行榜按飞书 open_id、难度和练习方向保存每位员工的最佳成绩。
+- 登录后显示 BabyCare 看板娘 Q 版 AI 助手，支持 AI 入门提示词和 To B / To C 物流场景提问；通过 Pages Functions 调用 Cloudflare Workers AI，服务端只保存每日提问计数，不保存对话内容。每位用户每日最多 20 次。
 
 ## 测试路径
 
@@ -40,7 +41,7 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 ## 当前边界与下一步
 
-本版是预设题库驱动的静态学习游戏，不调用大模型，不读取真实订单，不代表生产业务规则。
+本版题库是静态学习游戏；AI 助手可回答通用学习问题，但不会读取真实订单，也不代表生产业务规则。
 
 学习进度和错题仍保存在个人浏览器。原浏览器的个人榜单会在新版本首次打开时按当前飞书身份迁移到企业排行榜。成绩来自客户端游戏并做范围校验，适合内部学习激励，不作为正式绩效或竞赛凭证。
 
@@ -50,13 +51,14 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 1. 在飞书开放平台创建企业自建应用，启用网页能力，网页地址填 `https://babycare2b.site`，添加回调 URL `https://babycare2b.site/api/auth/callback`，并发布应用。使用其他域名时，两处 URL 都换成实际 HTTPS 域名。
 2. 在 Pages 项目 Settings → Variables and Secrets 中设置：`FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_REDIRECT_URI`（完整回调 URL）、`SESSION_SECRET`（至少 32 个字符的随机值）和 `ADMIN_FEISHU_OPEN_ID`（管理员本人飞书登录后端返回的 open_id）。管理员 open_id 只配置在服务端，不提交到 Git；App Secret 和 Session Secret 使用 Secret 类型。
-3. 在 Pages 项目 Settings → Bindings 中新增 D1 database 绑定：变量名 `LEADERBOARD_DB`，数据库 `ai-logistics-qa-leaderboard`，应用到 Production（需要验证预览时也绑定 Preview）。首次升级执行 `migrations/0002_create_visit_logs.sql`；20 题版本执行 `migrations/0003_expand_leaderboard_to_20_questions.sql`，该迁移保留历史 6 题成绩。排行榜初始结构见 `migrations/0001_create_leaderboard.sql`。
-4. 确认 `functions/` 目录随项目根目录一起部署。提交后等待 Pages Functions 部署完成，再用两个飞书账号分别登录并验证双方看到同一排行榜。
+3. 在 Pages 项目 Settings → Bindings → Add → Workers AI 新增绑定，变量名填 `AI`，应用到 Production。此绑定通过 Cloudflare 托管模型运行，无需在浏览器端保存模型密钥；修改绑定后重新部署。
+4. 在 Pages 项目 Settings → Bindings 中确认 D1 database 绑定：变量名 `LEADERBOARD_DB`，数据库 `ai-logistics-qa-leaderboard`，应用到 Production（需要验证预览时也绑定 Preview）。首次升级执行 `migrations/0002_create_visit_logs.sql`；20 题版本执行 `migrations/0003_expand_leaderboard_to_20_questions.sql`；助手版本执行 `migrations/0004_assistant_usage.sql`。该迁移只存每日请求数与不可逆的用户标识摘要。排行榜初始结构见 `migrations/0001_create_leaderboard.sql`。
+5. 确认 `functions/` 目录随项目根目录一起部署。提交后等待 Pages Functions 部署完成，用飞书登录后打开右下角助手，发送提示词或物流场景问题，再检查错误提示和每日次数反馈。
 
 `lark-cli auth login` 是 CLI 工具的 Device Flow 授权，授权的是命令行自身，不能代替网站访客的网页扫码登录；本项目使用飞书网页 QR SDK、OAuth 回调和服务端会话。登录只用于获取用户基本身份，不访问物流、通讯录等业务数据；如果飞书后台提示需要用户基本信息权限，请按最小权限配置。
 
 通过 `python3 -m http.server` 打开的静态本地页面不运行 Pages Functions，因此不能使用飞书登录或企业共享排行榜；共享功能需通过 Cloudflare Pages 地址访问。
 
-文件职责：`index.html` 页面外壳；`styles.css` 样式；`auth.js` 飞书会话验证及登录后脚本加载；`app.js` 交互与本地存储；`questions.js` 基础题库；`questions-expanded.js` 按难度和主题扩展的深度题库；`core.js` 抽题、选项打乱、积分和排序逻辑。
+文件职责：`index.html` 页面外壳与助手组件；`styles.css` 样式；`auth.js` 飞书会话验证及登录后脚本加载；`assistant.js` 助手交互；`functions/api/assistant.js` 登录校验、用量限制与模型调用；`app.js` 游戏交互与本地存储；`questions.js` 基础题库；`questions-expanded.js` 按难度和主题扩展的深度题库；`core.js` 抽题、选项打乱、积分和排序逻辑。
 
 基础阅读：[IBM 提示词技巧](https://www.ibm.com/think/topics/prompt-engineering-techniques)、[GS1 EPCIS 事件信息](https://www.gs1.org/standards/epcis)。题库中的数字和规则均为教学约定，不代表任何公司或承运商实际规则。

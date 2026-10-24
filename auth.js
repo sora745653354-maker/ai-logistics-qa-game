@@ -88,6 +88,7 @@
         await loadScript('questions-expanded.js');
         await loadScript('core.js');
         await loadScript('app.js');
+        await loadScript('assistant.js');
         document.querySelector('#profile-name').textContent = result.user.name;
         const avatar = document.querySelector('.profile-button .avatar');
         if (result.user.avatar_url && /^https:\/\//i.test(result.user.avatar_url)) {
