@@ -99,7 +99,7 @@ export async function onRequestPost({ request, env }) {
 
   try {
     for (let i = 0; i < records.length; i += 100) {
-      const statements = records.slice(i, i + 100).map(record => saveBest(db, user, record, migration));
+      const statements = await Promise.all(records.slice(i, i + 100).map(record => saveBest(db, user, record, migration)));
       await db.batch(statements);
     }
     return json({ saved: records.length });
