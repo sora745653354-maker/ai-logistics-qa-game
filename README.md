@@ -20,20 +20,20 @@ python3 -m http.server 4187 --bind 127.0.0.1
 - 每题即时解析、关键知识总结、整局答案回顾。
 - Easy / Normal / Hard 基础分为 100 / 150 / 200。连续答对的额外奖励依次为 0、10、20、30、30、30；答错重置连击，不扣已得分。
 - 不限时、不按速度加分。六题全对满分分别为 720、1020、1320。
-- 结算页输入昵称保存排行；按难度与练习方向分组，相同昵称只显示最佳成绩。同分时用时短者优先，其后按获得成绩时间排序。
+- 结算页以飞书姓名保存排行；按飞书身份、难度与练习方向分组，每人每组只显示最佳成绩。同分时用时短者优先，其后按获得成绩时间排序。
 - 错题自动收集、展开解析、错题重练、手动标记已掌握。错题重练不进入正式成绩统计和排行榜。
-- 学习进度、昵称、成绩、错题使用浏览器 localStorage 保存；无法存储时提示并允许会话内体验。
+- 学习进度、昵称和错题使用浏览器 localStorage 保存；排行榜成绩写入 Cloudflare D1，在飞书登录员工和不同浏览器之间共享。
 - 知识补给站和可复制的物流提示词模板。
 - 响应式桌面/窄屏页面、键盘 1–4 选项、Enter 确认、减少动态效果偏好。
 - 飞书扫码登录门禁：未登录只显示扫码页；飞书回调在 Pages Functions 服务端换取身份并签发 HttpOnly 会话 Cookie；游戏脚本在会话验证后才加载。
-- 成绩、错题和学习进度按飞书 open_id 分开保存在本机；排行榜目前仍是当前浏览器本地榜。
+- Pages Functions 使用飞书会话验证成绩读写；排行榜按飞书 open_id、难度和练习方向保存每位员工的最佳成绩。
 
 ## 测试路径
 
 1. 选择难度及方向，开始挑战；未选答案时不能提交。
 2. 故意答错一题，检查零分反馈和错题记录；继续答对，检查连击分数。
 3. 完成 6 题，检查题数、分数、正确率、用时和完整解析。
-4. 输入昵称保存，在相同难度和方向的排行榜查看，刷新检查保留情况。
+4. 用飞书身份保存成绩，在相同难度和方向的企业共享排行榜查看，刷新检查保留情况。
 5. 进入错题本，完成重练，确认没有出现保存正式排行的入口。
 6. 点击头像查看飞书身份并退出登录。
 
@@ -41,19 +41,20 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 本版是预设题库驱动的静态学习游戏，不调用大模型，不读取真实订单，不代表生产业务规则。
 
-当前排行榜只在相同浏览器、相同访问地址下保存；不同设备和浏览器不会共享。通过内网穿透分享网页后，各访问者仍有各自的本地榜单。更改主机名、端口或清理浏览器数据会切换或清除记录。昵称不能证明真实身份，本地分数可被浏览器开发工具修改，不适合正式竞赛。
+学习进度和错题仍保存在个人浏览器。原浏览器的个人榜单会在新版本首次打开时按当前飞书身份迁移到企业排行榜。成绩来自客户端游戏并做范围校验，适合内部学习激励，不作为正式绩效或竞赛凭证。
 
 ## 飞书扫码登录配置
 
 登录后端使用 Cloudflare Pages Functions。通过 `python3 -m http.server` 打开静态文件时，Functions 不会运行，因此登录会停留在提示页；在 Cloudflare Pages 预览或生产环境中测试。
 
-1. 在飞书开放平台创建企业自建应用，启用网页能力，网页地址填 `https://ai-logistics-qa-game.pages.dev`，添加回调 URL `https://ai-logistics-qa-game.pages.dev/api/auth/callback`，并发布应用。使用其他域名时，两处 URL 都换成实际 HTTPS 域名。
-2. 在 Cloudflare Pages 项目的 Settings → Variables and Secrets 中设置：`FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_REDIRECT_URI`（完整回调 URL）和 `SESSION_SECRET`（至少 32 个字符的随机值）。其中 `FEISHU_APP_SECRET` 和 `SESSION_SECRET` 必须启用 Encrypt，不能写入前端文件或 Git。
-3. 确认 `functions/` 目录随项目根目录一起部署。提交后等待 Pages Functions 部署完成，再用飞书扫码授权验证登录和退出流程。
+1. 在飞书开放平台创建企业自建应用，启用网页能力，网页地址填 `https://babycare2b.site`，添加回调 URL `https://babycare2b.site/api/auth/callback`，并发布应用。使用其他域名时，两处 URL 都换成实际 HTTPS 域名。
+2. 在 Cloudflare Pages 项目的 Settings → Variables and Secrets 中设置：`FEISHU_APP_ID`、`FEISHU_APP_SECRET`、`FEISHU_REDIRECT_URI`（完整回调 URL）和 `SESSION_SECRET`（至少 32 个字符的随机值）。其中 App Secret 和 Session Secret 必须设为 Secret，不能写入前端文件或 Git。
+3. 在 Pages 项目 Settings → Bindings 中新增 D1 database 绑定：变量名 `LEADERBOARD_DB`，数据库 `ai-logistics-qa-leaderboard`，应用到 Production（需要验证预览时也绑定 Preview）。表结构见 `migrations/0001_create_leaderboard.sql`。
+4. 确认 `functions/` 目录随项目根目录一起部署。提交后等待 Pages Functions 部署完成，再用两个飞书账号分别登录并验证双方看到同一排行榜。
 
 `lark-cli auth login` 是 CLI 工具的 Device Flow 授权，授权的是命令行自身，不能代替网站访客的网页扫码登录；本项目使用飞书网页 QR SDK、OAuth 回调和服务端会话。登录只用于获取用户基本身份，不访问物流、通讯录等业务数据；如果飞书后台提示需要用户基本信息权限，请按最小权限配置。
 
-配置上述飞书应用凭证和 Cloudflare Secret 后，使用 `https://ai-logistics-qa-game.pages.dev/#home` 验证真实扫码登录。排行榜及分数仍保存在当前浏览器；如需跨设备团队排行榜，还需添加服务端数据库、服务端计分校验和排行榜 API。
+通过 `python3 -m http.server` 打开的静态本地页面不运行 Pages Functions，因此不能使用飞书登录或企业共享排行榜；共享功能需通过 Cloudflare Pages 地址访问。
 
 文件职责：`index.html` 页面外壳；`styles.css` 样式；`app.js` 交互与本地存储；`questions.js` 教学题库；`core.js` 抽题、积分和排序逻辑。
 
