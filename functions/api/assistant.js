@@ -76,13 +76,28 @@ export async function onRequestPost({ request, env }) {
       temperature: 0.6,
       store: false,
     });
+    const choice = result?.choices?.[0];
+    const message = choice?.message;
+    const content = message?.content;
     console.log('BabyCare AI response shape', JSON.stringify({
       type: typeof result,
       keys: result && typeof result === 'object' ? Object.keys(result) : [],
       hasResponse: typeof result?.response === 'string',
-      hasChoices: Array.isArray(result?.choices),
+      choiceCount: Array.isArray(result?.choices) ? result.choices.length : 0,
+      choiceKeys: choice && typeof choice === 'object' ? Object.keys(choice) : [],
+      messageKeys: message && typeof message === 'object' ? Object.keys(message) : [],
+      contentType: typeof content,
+      contentIsArray: Array.isArray(content),
+      textType: typeof choice?.text,
+      finishReason: choice?.finish_reason,
     }));
-    const answer = result?.response || result?.choices?.[0]?.message?.content;
+    const answer = typeof result?.response === 'string'
+      ? result.response
+      : typeof content === 'string'
+        ? content
+        : Array.isArray(content)
+          ? content.map(part => typeof part === 'string' ? part : part?.text).filter(text => typeof text === 'string').join('\n')
+          : choice?.text;
     if (typeof answer !== 'string' || !answer.trim()) throw new Error('empty model response');
     return json({ answer: answer.trim(), remaining: DAILY_LIMIT - usage.requests });
   } catch (error) {
