@@ -53,7 +53,7 @@
         const data = event.data;
         let tmpCode = typeof data === 'string' ? data : data?.tmp_code || data?.tmpCode;
         if (typeof tmpCode === 'string') {
-          tmpCode = tmpCode.match(/(?:^|[?&])tmp_code=([^&"\\s]+)/)?.[1] || tmpCode;
+          tmpCode = tmpCode.match(/(?:^|[?&])tmp_code=([^&"\s]+)/)?.[1] || tmpCode;
         }
         if (typeof tmpCode !== 'string' || !tmpCode.trim() || tmpCode.length > 4096) return;
 
