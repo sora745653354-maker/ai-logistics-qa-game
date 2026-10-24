@@ -45,5 +45,32 @@
   </div>
   <dialog id="modal"><div id="modal-content"></div></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <section id="ai-assistant" class="ai-assistant" aria-label="BabyCare AI 助手" hidden>
+    <button id="assistant-toggle" class="assistant-toggle" type="button" aria-label="打开 BabyCare AI 助手" aria-expanded="false" aria-controls="assistant-panel">
+      <span class="assistant-peek"><img src="assets/assistant-babycare.png" alt="" aria-hidden="true"></span>
+      <span class="assistant-toggle-label"><span class="assistant-status-dot"></span>问问看板娘</span>
+    </button>
+    <section id="assistant-panel" class="assistant-panel" aria-label="和 BabyCare 看板娘聊天" hidden>
+      <header class="assistant-header">
+        <span class="assistant-avatar"><img src="assets/assistant-babycare.png" alt=""></span>
+        <span class="assistant-title"><strong>BabyCare 看板娘</strong><small>AI 物流学习助手</small></span>
+        <button id="assistant-close" class="assistant-close" type="button" aria-label="关闭助手">×</button>
+      </header>
+      <div id="assistant-messages" class="assistant-messages" aria-live="polite" aria-label="对话内容">
+        <div class="assistant-message assistant">你好呀，我是看板娘！可以问我 AI 入门、提示词写法，或 To B / To C 物流场景问题。</div>
+        <div class="assistant-suggestions" aria-label="试试这样提问">
+          <button type="button" data-assistant-prompt="帮我把‘整理客户的物流异常并给出处理建议’写成一个好用的 AI 提示词。">怎么写好提示词？</button>
+          <button type="button" data-assistant-prompt="To B 物流订单出现延误时，怎么用 AI 整理异常原因和客户沟通内容？">To B 异常怎么处理？</button>
+          <button type="button" data-assistant-prompt="消费者询问包裹为什么还没送到，怎样用 AI 写一段有同理心且不乱承诺的回复？">To C 客服怎么回复？</button>
+        </div>
+      </div>
+      <p id="assistant-hint" class="assistant-hint">每位登录用户每天可提问 20 次 · 请勿输入客户隐私信息</p>
+      <form id="assistant-form" class="assistant-form">
+        <label class="sr-only" for="assistant-input">输入你的问题</label>
+        <textarea id="assistant-input" rows="1" maxlength="1200" placeholder="输入问题，按 Enter 发送" required></textarea>
+        <button id="assistant-send" class="assistant-send" type="submit" aria-label="发送问题">↑</button>
+      </form>
+    </section>
+  </section>
 </body>
 </html>
