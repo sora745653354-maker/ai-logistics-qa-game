@@ -105,7 +105,12 @@
   }
   const boardStatus = (level, topic) => sharedBoardErrors.get(boardKey(level, topic)) || '正在读取全员共享榜单…';
   const state = { page: 'home', level: 'easy', topic: 'all', boardLevel: 'easy', boardTopic: 'all', quiz: null, result: null };
-  const names = { home: '挑战大厅', leaderboard: '排行榜', knowledge: '知识补给站', mistakes: '我的错题本', challenge: '正在挑战', result: '挑战成绩' };
+  const names = { home: '挑战大厅', leaderboard: '排行榜', knowledge: '知识补给站', mistakes: '我的错题本', admin: '用户访问记录', challenge: '正在挑战', result: '挑战成绩' };
+  const avatarContents = user => {
+    const url = /^https:\/\//i.test(user?.avatar_url || '') ? user.avatar_url : '';
+    return url ? `<img src="${esc(url)}" alt="${esc(user.name || '飞书用户')}的飞书头像">` : esc((user?.name || '飞').slice(0, 1));
+  };
+  const avatarMarkup = (user, large = false) => `<span class="avatar ${large ? 'large' : ''}">${avatarContents(user)}</span>`;
   const duration = seconds => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`;
   let toastTimer;
   function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('#toast').classList.remove('show'), 3500); }
@@ -115,7 +120,7 @@
     modal(`${modalHead('把学习，变成一次小挑战')}<p>每局 6 道单选题，选好后点击“确认答案”。答完一题，就能看到解释和一句知识总结。</p><ul><li>Easy / Normal / Hard 每题基础分为 100 / 150 / 200 分。</li><li>连续答对从第 2 题起加 10、20、30 分，之后每题最多加 30 分；答错得 0 分并重置连击。</li><li>不倒计时、不按速度加分；同分按完成用时排序。全对满分为 720 / 1020 / 1320 分。</li><li>综合练习每类抽 2 题；专项练习抽该类 6 题。题目和选项顺序随机。</li><li>排行榜按难度和方向分别比较，同一昵称保留最佳成绩。错题练习不上榜。</li></ul><p>题目属于教学场景；涉及时间、指标和业务规则时，以题内约定为准。本版使用预设题库，没有连接大模型或业务系统。</p><button class="primary-button full-width" data-close>明白了，去挑战 ${icon('arrow')}</button>`);
   }
   function showProfile() {
-    modal(`${modalHead('你的飞书学习身份')}<span class="avatar large">${esc((data.name || '飞').slice(0, 1))}</span><h3 class="identity-name">${esc(data.name)}</h3><p>已通过飞书扫码验证。学习进度和错题保存在当前浏览器；排行榜成绩保存在企业共享数据库，并按飞书身份归属。</p><button class="secondary-button full-width" id="clear-data">清除本机学习记录 ${icon('refresh')}</button><button class="text-button logout-button" id="logout-button">退出飞书登录 ↗</button>`);
+    modal(`${modalHead('你的飞书学习身份')}${avatarMarkup(window.FEISHU_USER, true)}<h3 class="identity-name">${esc(data.name)}</h3><p>已通过飞书扫码验证。学习进度和错题保存在当前浏览器；排行榜成绩保存在企业共享数据库，并按飞书身份归属。</p><button class="secondary-button full-width" id="clear-data">清除本机学习记录 ${icon('refresh')}</button><button class="text-button logout-button" id="logout-button">退出飞书登录 ↗</button>`);
     $('#clear-data').onclick = () => {
       modal(`${modalHead('清除本机学习记录？')}<p>这会清除本浏览器的学习进度和错题。已发布到企业共享排行榜的成绩会继续保留。</p><button class="secondary-button full-width" data-close>保留记录</button><button class="primary-button full-width" id="confirm-clear">确认清除</button>`);
       $('#confirm-clear').onclick = () => { localStorage.removeItem(`${STORE}:shared-leaderboard-v1`); data = blank(); persist(); state.quiz = null; state.result = null; $('#modal').close(); go('home', true); toast('本机学习记录已清除'); };
@@ -130,7 +135,7 @@
   $('#modal').addEventListener('click', e => { const rect = $('#modal').getBoundingClientRect(); if (e.target === $('#modal') && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) $('#modal').close(); });
   function syncChrome() {
     $('#profile-name').textContent = data.name || '体验学员';
-    $('.profile-button .avatar').textContent = (data.name || '学').slice(0, 1);
+    $('.profile-button .avatar').innerHTML = avatarContents(window.FEISHU_USER);
     $('#mistake-badge').textContent = data.mistakes.length;
     $('#breadcrumb-current').textContent = names[state.page];
     document.querySelectorAll('[data-page]').forEach(a => { const active = a.dataset.page === state.page || (a.dataset.page === 'home' && ['challenge', 'result'].includes(state.page)); a.classList.toggle('active', active); if (active) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
@@ -252,6 +257,27 @@
     if ($('#board-retry')) $('#board-retry').onclick = async () => { sharedBoardErrors.delete(key); await refreshSharedBoard(state.boardLevel, state.boardTopic, true); leaderboard(); };
     ensureSharedBoard(state.boardLevel, state.boardTopic, 'leaderboard');
   }
+  async function admin() {
+    if (!window.FEISHU_IS_ADMIN) { go('home', true); return; }
+    $('#main').innerHTML = `${heading('ADMINISTRATION', '用户访问记录', '查看飞书成员成功扫码登录这套学习游戏的时间。') }<section class="panel"><div class="admin-toolbar"><span id="visit-count">正在读取访问记录…</span><button class="secondary-button" id="visits-refresh">刷新记录 ${icon('refresh')}</button></div><div id="visits-content" class="admin-visits"></div></section>`;
+    const content = $('#visits-content');
+    const load = async () => {
+      content.innerHTML = '<div class="empty-state"><p>正在读取记录…</p></div>';
+      try {
+        const response = await fetch('/api/admin/visits?limit=500', { credentials: 'same-origin', cache: 'no-store' });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || '读取失败');
+        const visits = result.visits || [];
+        $('#visit-count').textContent = `最近 ${visits.length} 条成功登录记录`;
+        content.innerHTML = visits.length ? `<table><thead><tr><th>用户</th><th>访问时间</th></tr></thead><tbody>${visits.map(v => `<tr><td><div class="visit-user">${avatarMarkup({ name: v.name, avatar_url: v.avatar_url })}<strong>${esc(v.name || '飞书用户')}</strong></div></td><td>${new Date(v.visited_at).toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', hour12: false })}</td></tr>`).join('')}</tbody></table>` : '<div class="empty-state"><p>还没有成功登录记录。</p></div>';
+      } catch (error) {
+        $('#visit-count').textContent = '记录读取失败';
+        content.innerHTML = `<div class="empty-state"><p>${esc(error.message || '读取失败，请重试。')}</p></div>`;
+      }
+    };
+    $('#visits-refresh').onclick = load;
+    await load();
+  }
   const template = '任务：请把以下物流异常记录整理成跟进清单。\n背景：供内部业务同事核对与处理。\n输入：粘贴已经获得授权、去掉个人敏感信息的记录。\n约束：只依据输入，不补造时间、原因、责任人或客户承诺；缺失写“待确认”；区分事实与推测。\n输出：表格，列为记录标识、异常事实、业务影响、待确认事项、下一步；保留来源标识。\n校验：列出已处理记录数、重复或冲突记录，以及需要人工确认的内容。';
   function knowledge() {
     const cards = [
@@ -273,7 +299,7 @@
     if ($('#mistake-start')) $('#mistake-start').onclick = () => go('home');
     document.querySelectorAll('[data-mastered]').forEach(b => b.onclick = () => { data.mistakes = data.mistakes.filter(m => m.id !== b.dataset.mastered); persist(); syncChrome(); mistakes(); toast('已移出错题本，继续保持！'); });
   }
-  function render() { syncChrome(); ({ home, challenge: quiz, result, leaderboard, knowledge, mistakes }[state.page] || home)(); }
+  function render() { syncChrome(); ({ home, challenge: quiz, result, leaderboard, knowledge, mistakes, admin }[state.page] || home)(); }
   document.addEventListener('keydown', e => {
     if (state.page !== 'challenge' || !state.quiz || $('#modal').open || e.altKey || e.ctrlKey || e.metaKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     if (['1', '2', '3', '4'].includes(e.key) && !state.quiz.answered) { e.preventDefault(); choose(Number(e.key) - 1); }
@@ -281,6 +307,6 @@
   });
   setInterval(() => { if (state.page === 'challenge' && state.quiz && $('#quiz-clock')) $('#quiz-clock').textContent = duration((Date.now() - state.quiz.started) / 1000); }, 1000);
   const initialPage = location.hash.slice(1);
-  state.page = ['home', 'leaderboard', 'knowledge', 'mistakes'].includes(initialPage) ? initialPage : 'home';
+  state.page = ['home', 'leaderboard', 'knowledge', 'mistakes'].includes(initialPage) || (initialPage === 'admin' && window.FEISHU_IS_ADMIN) ? initialPage : 'home';
   render();
 })();

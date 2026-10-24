@@ -11,6 +11,7 @@
     status.textContent = message;
     status.classList.toggle('is-error', isError);
   }
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -80,13 +81,18 @@
       const result = await response.json();
       if (response.ok && result.user) {
         window.FEISHU_USER = result.user;
+        window.FEISHU_IS_ADMIN = result.is_admin === true;
         screen.hidden = true;
         document.body.classList.add('authenticated');
         await loadScript('questions.js');
         await loadScript('core.js');
         await loadScript('app.js');
         document.querySelector('#profile-name').textContent = result.user.name;
-        document.querySelector('.profile-button .avatar').textContent = (result.user.name || '飞').slice(0, 1);
+        const avatar = document.querySelector('.profile-button .avatar');
+        if (result.user.avatar_url && /^https:\/\//i.test(result.user.avatar_url)) {
+          avatar.innerHTML = `<img src="${escapeHtml(result.user.avatar_url)}" alt="${escapeHtml(result.user.name)}的飞书头像">`;
+        } else avatar.textContent = (result.user.name || '飞').slice(0, 1);
+        document.querySelector('#admin-nav').hidden = !window.FEISHU_IS_ADMIN;
         return;
       }
       await startQr();
