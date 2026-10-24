@@ -49,6 +49,16 @@ export async function onRequestGet({ request, env }) {
     const openId = info.open_id;
     if (!openId) throw new Error('飞书未返回有效用户身份');
     const user = { open_id: openId, name: String(info.name || info.en_name || '飞书用户').slice(0, 40), avatar_url: info.avatar_url || '' };
+    if (env.LEADERBOARD_DB) {
+      try {
+        await env.LEADERBOARD_DB.prepare(`
+          INSERT INTO visit_logs (open_id, name, avatar_url, visited_at)
+          VALUES (?, ?, ?, ?)
+        `).bind(user.open_id, user.name, user.avatar_url, Date.now()).run();
+      } catch {
+        // Keep sign-in available if visit logging is temporarily unavailable.
+      }
+    }
     const now = Math.floor(Date.now() / 1000);
     const session = await signSession({ user, iat: now, exp: now + 28800 }, env.SESSION_SECRET);
     const response = noStoreRedirect(`${origin}/`, { 'set-cookie': setCookie('ai_lab_session', session, 28800) });
