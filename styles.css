@@ -14,3 +14,27 @@ dialog{border:1px solid #e6ddef;border-radius:20px;padding:0;max-width:480px;wid
 .hero p{color:#766a88;font-size:12px}.page-heading p{color:#82798f}.difficulty-card p{color:#80728f;font-size:11px}.difficulty-card h3 span{color:#8c7d9c}.difficulty-bottom{color:#8a7c97;font-size:10px}.chip{color:#82718f;font-size:12px}.start-meta{color:#8e7e9c}.settings-label{font-size:12px}.personal-stats small,.personal-level small{color:#8d7c9d}.score-panel .hello{color:#9583a4}.achievement-line{color:#9581a5}.panel-title button{color:#9782a7}.mini-empty p,.board-foot{color:#9b88a7}.knowledge-teaser p{color:#698575}.knowledge-teaser h3{color:#476758}.question-context{color:#80668f;font-size:12px}.question-instruction{color:#8f7b9f}.option{color:#73617e;font-size:13px}.keyboard-tip{color:#9b87ad}.feedback p{color:#607d6b}.is-wrong p{color:#8f795c}.score-rules{color:#8d779f}.encouragement{color:#9a84ae}.result-banner>p{color:#9478a8}.result-stats small{color:#9b7eaf}.review-item p{color:#8e779e;font-size:12px}.review-item h3{font-size:13px}.form-note{color:#9780a9;font-size:11px}.save-form label{color:#8e729f}.board-caption span,.board-note{color:#9783a9}.empty-state p{color:#a086b0}.knowledge-card>p,.knowledge-list li{color:#8d759d;font-size:12px}.prompt-box pre{color:#8a6b9e}.source-links{color:#9b85ad;font-size:11px}.modal-inner p,.modal-inner ul{color:#8e729f}.login-placeholder small{color:#a18ab3}
 @media(max-width:700px){.hero p{font-size:11px;max-width:210px}.difficulty-card p{font-size:10px}.difficulty-bottom{font-size:9px}.chip{font-size:10px}.settings-label{font-size:11px}.option{font-size:12px}.question-context{font-size:11px}.score-rules{font-size:10px}.review-item p{font-size:11px}.review-item h3{font-size:12px}.knowledge-card>p,.knowledge-list li{font-size:11px}.modal-inner p,.modal-inner ul{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Feishu sign-in gate */
+body:not(.authenticated){min-height:100vh;overflow:hidden;background:radial-gradient(circle at 50% 18%,#f4efff 0,#faf9fc 42%,#f7f6fa 100%)}
+body:not(.authenticated)>.sidebar,body:not(.authenticated)>.app-shell{display:none}
+.auth-screen{position:fixed;inset:0;z-index:100;display:grid;place-items:center;max-width:none;min-height:100vh;margin:0;padding:24px;outline:none!important}
+.auth-screen[hidden]{display:none}
+.auth-card{width:min(100%,440px);padding:38px 42px 32px;border:1px solid #eee9f6;border-radius:22px;background:#fff;box-shadow:0 20px 70px #37225412;text-align:center}
+.auth-brand{justify-content:center;padding:0;margin-bottom:33px;text-align:left}
+.auth-eyebrow{color:#a18caf;font-size:9px;font-weight:700;letter-spacing:2px}
+.auth-card h1{margin-top:7px;font-size:25px;letter-spacing:-.5px}
+.auth-description{max-width:300px;margin:7px auto 17px;color:#92899e;font-size:12px;line-height:1.8}
+.feishu-qr{display:grid;place-items:center;width:280px;height:280px;max-width:100%;margin:0 auto;border:1px solid #eeeaf4;border-radius:14px;background:#fff;overflow:hidden}
+.feishu-qr iframe{border:0!important;max-width:100%;max-height:100%}
+.qr-placeholder{color:#9e95aa;font-size:12px;line-height:1.8;padding:22px}
+.qr-error{color:#a16166}
+.auth-status{min-height:22px;margin:13px 0 7px;color:#81738f;font-size:11px}
+.auth-status.is-error{color:#b25158}
+.auth-retry{margin:0 auto 10px}
+.auth-retry[hidden]{display:none}
+.auth-footnote{display:block;margin-top:15px;color:#aaa2b2;font-size:10px}
+.identity-name{margin:-11px 0 9px;font-size:17px}
+.verified-identity{margin:2px 0 12px;color:#91859d;font-size:12px}.verified-identity strong{color:#614a7f}
+.logout-button{margin-top:12px}
+@media(max-width:520px){.auth-screen{padding:16px}.auth-card{padding:30px 22px 25px}.auth-brand{margin-bottom:25px}.auth-card h1{font-size:22px}.feishu-qr{width:260px;height:260px}}
