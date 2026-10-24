@@ -15,7 +15,7 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 ## 已实现
 
-- 90 道中文单选题：Easy / Normal / Hard 各 30 道，每档覆盖 AI 与提示词、物流 To B、物流 To C 各 10 道。新增内容从知识库依据、测试集与结构校验，扩展到履约口径、事件时间、ETA 误差、调度约束、数据隐私和人工升级。
+- 552 道中文单选题：Easy / Normal / Hard 各 184 道；每个难度与主题组合有 61–62 道，覆盖 AI 与提示词、物流 To B、物流 To C。新增内容涉及提示词设计、知识库版本、评估集、误报漏报、结构与业务校验、权限与审计、订单粒度、库存、预约、线路约束、事件时间、ETA、末端服务、逆向物流、隐私和风险升级。
 - 每局 6 题。综合练习每类 2 题；专项练习为该类 6 题。随机题目顺序、随机选项顺序。
 - 每题即时解析、关键知识总结、整局答案回顾。
 - Easy / Normal / Hard 基础分为 100 / 150 / 200。连续答对的额外奖励依次为 0、10、20、30、30、30；答错重置连击，不扣已得分。
@@ -57,6 +57,6 @@ python3 -m http.server 4187 --bind 127.0.0.1
 
 通过 `python3 -m http.server` 打开的静态本地页面不运行 Pages Functions，因此不能使用飞书登录或企业共享排行榜；共享功能需通过 Cloudflare Pages 地址访问。
 
-文件职责：`index.html` 页面外壳；`styles.css` 样式；`app.js` 交互与本地存储；`questions.js` 教学题库；`core.js` 抽题、积分和排序逻辑。
+文件职责：`index.html` 页面外壳；`styles.css` 样式；`auth.js` 飞书会话验证及登录后脚本加载；`app.js` 交互与本地存储；`questions.js` 基础题库；`questions-expanded.js` 按难度和主题扩展的深度题库；`core.js` 抽题、选项打乱、积分和排序逻辑。
 
 基础阅读：[IBM 提示词技巧](https://www.ibm.com/think/topics/prompt-engineering-techniques)、[GS1 EPCIS 事件信息](https://www.gs1.org/standards/epcis)。题库中的数字和规则均为教学约定，不代表任何公司或承运商实际规则。

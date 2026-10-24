@@ -85,6 +85,7 @@
         screen.hidden = true;
         document.body.classList.add('authenticated');
         await loadScript('questions.js');
+        await loadScript('questions-expanded.js');
         await loadScript('core.js');
         await loadScript('app.js');
         document.querySelector('#profile-name').textContent = result.user.name;
